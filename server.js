@@ -5,332 +5,242 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ================================
-// ASCII ART
-// ================================
+const ansi = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  dim: "\x1b[2m",
+  green: "\x1b[38;5;114m",
+  cyan: "\x1b[38;5;117m",
+  yellow: "\x1b[38;5;221m",
+  white: "\x1b[97m",
+  gray: "\x1b[38;5;245m",
+  red: "\x1b[38;5;210m",
+};
 
-const stitch = fs.readFileSync(path.join(__dirname, "stitch.txt"), "utf8");
+const c = (color, text) => `${ansi[color]}${text}${ansi.reset}`;
+const avatarAscii = fs
+  .readFileSync(path.join(__dirname, "avatar_ascii.txt"), "utf8")
+  .trimEnd();
+const line = c("gray", "─".repeat(68));
+const prompt = (command) =>
+  `${c("green", "vinicius@portfolio")}${c("gray", ":~$ ")}${c("white", command)}`;
+const bullet = (text) => `  ${c("green", "▸")} ${text}`;
 
-// ================================
-// CORES DO TERMINAL
-// ================================
+function frame(title, content) {
+  return `
+${c("cyan", "╭" + "─".repeat(68) + "╮")}
+${c("cyan", "│")} ${c("bold", c("white", title.padEnd(66)))} ${c("cyan", "│")}
+${c("cyan", "╰" + "─".repeat(68) + "╯")}
 
-const verde = "\x1b[32m";
-const verdeClaro = "\x1b[92m";
-const cinza = "\x1b[90m";
-const branco = "\x1b[97m";
-const reset = "\x1b[0m";
-
-// ================================
-// CABEÇALHO
-// ================================
+${content}
+`;
+}
 
 function header() {
   return `
-${verde}
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║                  VINÍCIUS SANTOS CAMELO                      ║
-║                                                              ║
-║                    FRONT-END DEVELOPER                      ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-${reset}`;
+${c("cyan", "╭" + "─".repeat(68) + "╮")}
+${c("cyan", "│")} ${c("bold", c("white", "VINÍCIUS SANTOS CAMELO".padEnd(66)))} ${c("cyan", "│")}
+${c("cyan", "│")} ${c("green", "Front-end Developer".padEnd(66))} ${c("cyan", "│")}
+${c("cyan", "╰" + "─".repeat(68) + "╯")}
+
+${c("green", avatarAscii)}
+
+${c("gray", "  currículo em modo terminal  ·  disponível para oportunidades")}
+`;
 }
 
-// ================================
-// HOME
-// ================================
+function send(res, body, status = 200) {
+  res.status(status).type("text/plain; charset=utf-8").send(body);
+}
 
 app.get("/", (req, res) => {
-  res.set("Content-Type", "text/plain; charset=utf-8");
+  send(
+    res,
+    `${header()}
+${prompt("whoami")}
 
-  res.send(`
-${verdeClaro}
-${stitch}
-${reset}
+${c("white", "Vinícius Santos Camelo")}
+${c("gray", "Estudante de Desenvolvimento de Sistemas com foco em")}
+${c("gray", "interfaces web, experiência do usuário e código bem organizado.")}
 
-${verde}
-╔══════════════════════════════════════════════════════════════╗
-║                  VINÍCIUS SANTOS CAMELO                     ║
-║                  FRONT-END DEVELOPER                        ║
-╚══════════════════════════════════════════════════════════════╝
-${reset}
+${line}
 
-${verdeClaro}$ whoami${reset}
+${prompt("status")}
 
-Vinícius Santos Camelo
+  ${c("green", "● ONLINE")}  ${c("gray", "aprendendo, construindo e aberto a novas conexões")}
 
-Estudante de Desenvolvimento de Sistemas apaixonado por
-tecnologia, desenvolvimento web e criação de interfaces.
+${line}
 
-${cinza}──────────────────────────────────────────────────────────────${reset}
+${prompt("help")}
 
-${verdeClaro}$ status${reset}
+  ${c("cyan", "/about")}     ${c("gray", "sobre mim e formação")}
+  ${c("cyan", "/skills")}    ${c("gray", "tecnologias e ferramentas")}
+  ${c("cyan", "/projects")}  ${c("gray", "projetos em destaque")}
+  ${c("cyan", "/contact")}   ${c("gray", "links e contato")}
+  ${c("cyan", "/github")}    ${c("gray", "abrir meu GitHub")}
 
-${verde}● ONLINE${reset}
+${line}
 
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ commands${reset}
-
-
-  $ curl /about       → Sobre mim
-  $ curl /skills      → Habilidades
-  $ curl /projects    → Projetos
-  $ curl /contact     → Contato
-  $ curl /github      → GitHub
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ example${reset}
-
-  curl ${verdeClaro}https://curriculo-terminal.onrender.com/about${reset}
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}> Bem-vindo ao meu currículo pelo terminal.${reset}
-
-`);
+${c("yellow", "> Use curl + uma rota para navegar pelo currículo.")}
+${c("gray", "  Exemplo: curl https://curriculo-terminal.onrender.com/about")}
+`,
+  );
 });
 
 app.get("/about", (req, res) => {
-  res.set("Content-Type", "text/plain; charset=utf-8");
+  send(
+    res,
+    `${header()}${frame(
+      "ABOUT / SOBRE MIM",
+      `${prompt("cat about.txt")}
 
-  res.send(`
+${c("white", "Sou estudante de Desenvolvimento de Sistemas e tenho")}
+${c("white", "interesse especial por desenvolvimento Front-end.")}
 
-${header()}
+${c("gray", "Gosto de transformar ideias em interfaces claras, modernas")}
+${c("gray", "e funcionais — sempre misturando tecnologia e criatividade.")}
 
-${verdeClaro}$ about${reset}
+${line}
 
-${branco}Vinícius Santos Camelo${reset}
+${prompt("cat education.txt")}
 
-Sou estudante de Desenvolvimento de Sistemas e tenho
-interesse principalmente em desenvolvimento Front-End.
+${bullet(c("white", "Técnico em Desenvolvimento de Sistemas"))}
+${bullet(c("gray", "Ensino Médio integrado ao curso técnico"))}
 
-Gosto de criar sites, interfaces modernas, animações
-e projetos que misturam tecnologia com criatividade.
+${line}
 
-Atualmente estou evoluindo meus conhecimentos em
-JavaScript, React, Node.js e desenvolvimento web.
+${prompt("cat focus.txt")}
 
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ education${reset}
-
-▸ Técnico em Desenvolvimento de Sistemas
-▸ Ensino Médio integrado ao curso técnico
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ focus${reset}
-
-▸ Front-End
-▸ Desenvolvimento Web
-▸ UI / UX
-▸ JavaScript
-▸ React
-
-`);
+${bullet(c("white", "Front-end e desenvolvimento web"))}
+${bullet(c("white", "UI / UX e interfaces responsivas"))}
+${bullet(c("white", "JavaScript, React e Node.js"))}`,
+    )}
+`,
+  );
 });
 
 app.get("/skills", (req, res) => {
-  res.set("Content-Type", "text/plain; charset=utf-8");
+  const skills = [
+    ["HTML", 100],
+    ["CSS", 100],
+    ["JavaScript", 80],
+    ["Git / GitHub", 80],
+    ["React", 60],
+    ["Node.js", 50],
+    ["MySQL", 50],
+  ];
 
-  res.send(`
+  const bars = skills
+    .map(([name, value]) => {
+      const filled = Math.round(value / 5);
+      const bar = `${"█".repeat(filled)}${"░".repeat(20 - filled)}`;
+      return `${c("white", name.padEnd(13))} ${c("green", bar)} ${c("gray", `${value}%`)}`;
+    })
+    .join("\n");
 
-${header()}
+  send(
+    res,
+    `${header()}${frame(
+      "SKILLS / HABILIDADES",
+      `${prompt("top skills.txt")}
 
-${verdeClaro}$ skills${reset}
+${bars}
 
-${verde}HTML${reset}
-████████████████████ 100%
+${line}
 
-${verde}CSS${reset}
-████████████████████ 100%
+${prompt("ls tools/")}
 
-${verde}JavaScript${reset}
-████████████████░░░░ 80%
-
-${verde}Git / GitHub${reset}
-████████████████░░░░ 80%
-
-${verde}React${reset}
-████████████░░░░░░░░ 60%
-
-${verde}Node.js${reset}
-██████████░░░░░░░░░░ 50%
-
-${verde}MySQL${reset}
-██████████░░░░░░░░░░ 50%
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ tools${reset}
-
-▸ VS Code
-▸ GitHub
-▸ Git
-▸ MySQL Workbench
-▸ Figma
-▸ Node.js
-
-`);
+${bullet(c("white", "VS Code"))}
+${bullet(c("white", "Git e GitHub"))}
+${bullet(c("white", "Figma"))}
+${bullet(c("white", "Node.js"))}
+${bullet(c("white", "MySQL Workbench"))}`,
+    )}
+`,
+  );
 });
 
 app.get("/projects", (req, res) => {
-  res.set("Content-Type", "text/plain; charset=utf-8");
+  send(
+    res,
+    `${header()}${frame(
+      "PROJECTS / PROJETOS",
+      `${prompt("ls projects/")}
 
-  res.send(`
+${c("yellow", "01  SALOTTI OPINA")}
+${c("gray", "    Plataforma para alunos registrarem opiniões e experiências.")}
+${c("gray", "    stack: HTML · CSS · JavaScript")}
 
-${header()}
+${c("yellow", "02  VETCONTROLL")}
+${c("gray", "    Sistema web para gerenciamento de clínica veterinária.")}
+${c("gray", "    stack: HTML · CSS · JavaScript")}
 
-${verdeClaro}$ projects${reset}
+${c("yellow", "03  VINI-PRATIC")}
+${c("gray", "    Laboratório pessoal com desafios e experimentos de código.")}
+${c("gray", "    stack: HTML · CSS · JavaScript")}
 
-${verde}01.${reset} SALOTTI OPINA
+${line}
 
-    Plataforma inspirada em sistemas de avaliação,
-    onde alunos podem registrar opiniões e experiências.
-
-    Stack:
-    HTML • CSS • JavaScript
-
-
-${verde}02.${reset} VETCONTROLL
-
-    Projeto de desenvolvimento web voltado para
-    gerenciamento de uma clínica veterinária.
-
-    Stack:
-    HTML • CSS • JavaScript
-
-
-${verde}03.${reset} VINI-PRATIC
-
-    Meu laboratório pessoal de programação.
-
-    Um espaço para registrar minha evolução,
-    projetos, desafios e experimentos.
-
-    Stack:
-    HTML • CSS • JavaScript
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ more${reset}
-
-Novos projetos serão adicionados aqui conforme
-minha evolução como desenvolvedor.
-
-`);
+${c("green", "> novos projetos serão adicionados conforme minha evolução.")}`,
+    )}
+`,
+  );
 });
 
 app.get("/contact", (req, res) => {
-  res.set("Content-Type", "text/plain; charset=utf-8");
+  send(
+    res,
+    `${header()}${frame(
+      "CONTACT / CONTATO",
+      `${prompt("cat contact.txt")}
 
-  res.send(`
+${c("white", "Vinícius Santos Camelo")}
+${c("gray", "Para conhecer mais sobre meu trabalho:")}
 
-${header()}
+${bullet(`${c("cyan", "GitHub")}     https://github.com/ViniSantosC`)}
+${bullet(`${c("cyan", "LinkedIn")}   https://www.linkedin.com/in/vin%C3%ADcius-santos-490922244/`)}
+${bullet(`${c("cyan", "E-mail")}     mailto:vini976964150@gmail.com`)}
 
-${verdeClaro}$ contact${reset}
+${line}
 
-${branco}Vinícius Santos Camelo${reset}
+${prompt("echo $CONTACT")}
+${c("white", "vini976964150@gmail.com")}
 
-Para conhecer mais sobre meu trabalho:
-
-${verde}GitHub${reset}
-https://github.com/ViniSantosC
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ message${reset}
-
-Obrigado por visitar meu currículo pelo terminal!
-
-`);
+${c("yellow", "> obrigado por visitar meu currículo pelo terminal.")}`,
+    )}
+`,
+  );
 });
 
-app.get("/", (req, res) => {
-  res.set("Content-Type", "text/plain; charset=utf-8");
+app.get("/github", (req, res) => {
+  send(
+    res,
+    `${header()}${frame(
+      "GITHUB",
+      `${prompt("git remote -v")}
 
-  res.send(`
+${c("cyan", "https://github.com/ViniSantosC")}
 
-${verdeClaro}
-
-${stitch}
-
-${reset}
-
-${verde}
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║                  VINÍCIUS SANTOS CAMELO                     ║
-║                  FRONT-END DEVELOPER                        ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-${reset}
-
-${verdeClaro}$ whoami${reset}
-
-Vinícius Santos Camelo
-
-Estudante de Desenvolvimento de Sistemas apaixonado por
-tecnologia, desenvolvimento web e criação de interfaces.
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ status${reset}
-
-${verde}● ONLINE${reset}
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ commands${reset}
-
-  ${verde}$ curl /about${reset}       → Sobre mim
-  ${verde}$ curl /skills${reset}      → Minhas habilidades
-  ${verde}$ curl /projects${reset}    → Meus projetos
-  ${verde}$ curl /contact${reset}     → Contato
-  ${verde}$ curl /github${reset}      → GitHub
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}$ example${reset}
-
-  ${verde}curl https://curriculo-terminal.onrender.com/about${reset}
-
-${cinza}──────────────────────────────────────────────────────────────${reset}
-
-${verdeClaro}> Bem-vindo ao meu currículo pelo terminal.${reset}
-
-`);
+${c("gray", "Acesse o link acima para ver meus projetos e acompanhar minha evolução.")}`,
+    )}
+`,
+  );
 });
 
 app.use((req, res) => {
-  res.status(404);
-  res.set("Content-Type", "text/plain; charset=utf-8");
+  send(
+    res,
+    `${c("red", "╭" + "─".repeat(68) + "╮")}
+${c("red", "│")} ${c("bold", c("white", "404  ·  comando não encontrado".padEnd(66)))} ${c("red", "│")}
+${c("red", "╰" + "─".repeat(68) + "╯")}
 
-  res.send(`
+${prompt(req.path)}
 
-${verde}
-╔══════════════════════════════════════════════════════════════╗
-║                         404                                  ║
-╚══════════════════════════════════════════════════════════════╝
-${reset}
-
-${verdeClaro}$ error${reset}
-
-Comando ou rota não encontrada.
-
-${verdeClaro}$ available commands${reset}
-
-  /about
-  /skills
-  /projects
-  /contact
-  /github
-
-`);
+${c("gray", "Rotas disponíveis:")}
+  ${c("cyan", "/about")}  ${c("cyan", "/skills")}  ${c("cyan", "/projects")}  ${c("cyan", "/contact")}  ${c("cyan", "/github")}
+`,
+    404,
+  );
 });
 
 app.listen(PORT, () => {
